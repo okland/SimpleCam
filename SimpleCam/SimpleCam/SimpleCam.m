@@ -57,6 +57,7 @@ static CGFloat optionUnavailableAlpha = 0.2;
     BOOL isImageResized;
     BOOL isSaveWaitingForResizedImage;
     BOOL isRotateWaitingForResizedImage;
+    BOOL hideSwitchCameraButton;
     
     // Capture Toggle
     BOOL isCapturingImage;
@@ -188,7 +189,6 @@ static CGFloat optionUnavailableAlpha = 0.2;
 
 
 - (void) setup {
-    
     self.view.clipsToBounds = NO;
     self.view.backgroundColor = [UIColor blackColor];
     
@@ -220,21 +220,31 @@ static CGFloat optionUnavailableAlpha = 0.2;
     
     // SETTING UP CAM
     if (_mySesh == nil) _mySesh = [[AVCaptureSession alloc] init];
-	_mySesh.sessionPreset = AVCaptureSessionPresetPhoto;
+    _mySesh.sessionPreset = AVCaptureSessionPresetPhoto;
     
     _captureVideoPreviewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:_mySesh];
-	_captureVideoPreviewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
-	_captureVideoPreviewLayer.frame = _imageStreamV.layer.bounds; // parent of layer
+    _captureVideoPreviewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
+    _captureVideoPreviewLayer.frame = _imageStreamV.layer.bounds; // parent of layer
     
-	[_imageStreamV.layer addSublayer:_captureVideoPreviewLayer];
-	
+    [_imageStreamV.layer addSublayer:_captureVideoPreviewLayer];
+    
     // rear camera: 0 front camera: 1
     NSArray *devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
     if (devices.count==0) {
         NSLog(@"SC: No devices found (for example: simulator)");
         return;
     }
-    _myDevice = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo][0];
+    if (_disableFrontCamera || _disableRearCamera) {
+        hideSwitchCameraButton = YES;
+        if (!_disableFrontCamera) {
+            _myDevice = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo][1];
+        }else{
+            _myDevice = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo][0];
+        }
+    }else {
+        _myDevice = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo][0];
+    }
+    
     
     if ([_myDevice isFlashAvailable] && _myDevice.flashActive && [_myDevice lockForConfiguration:nil]) {
         //NSLog(@"SC: Turning Flash Off ...");
@@ -243,15 +253,15 @@ static CGFloat optionUnavailableAlpha = 0.2;
     }
     
     NSError * error = nil;
-	AVCaptureDeviceInput * input = [AVCaptureDeviceInput deviceInputWithDevice:_myDevice error:&error];
+    AVCaptureDeviceInput * input = [AVCaptureDeviceInput deviceInputWithDevice:_myDevice error:&error];
     
-	if (!input) {
-		// Handle the error appropriately.
-		NSLog(@"SC: ERROR: trying to open camera: %@", error);
+    if (!input) {
+        // Handle the error appropriately.
+        NSLog(@"SC: ERROR: trying to open camera: %@", error);
         [_delegate simpleCam:self didFinishWithImage:_capturedImageV.image];
-	}
+    }
     
-	[_mySesh addInput:input];
+    [_mySesh addInput:input];
     
     _stillImageOutput = [[AVCaptureStillImageOutput alloc] init];
     NSDictionary * outputSettings = [[NSDictionary alloc] initWithObjectsAndKeys: AVVideoCodecJPEG, AVVideoCodecKey, nil];
@@ -259,7 +269,7 @@ static CGFloat optionUnavailableAlpha = 0.2;
     [_mySesh addOutput:_stillImageOutput];
     
     
-	[_mySesh startRunning];
+    [_mySesh startRunning];
     
     if (self.interfaceOrientation == UIInterfaceOrientationLandscapeLeft) {
         _captureVideoPreviewLayer.connection.videoOrientation = AVCaptureVideoOrientationLandscapeLeft;
@@ -300,6 +310,13 @@ static CGFloat optionUnavailableAlpha = 0.2;
     
     // -- PREPARE OUR CONTROLS -- //
     [self loadControls];
+    
+    if (_showBluredBackground) {
+        UIView* bluredView = [[UIView alloc]initWithFrame:self.view.frame];
+        [bluredView setBackgroundColor:[UIColor colorWithRed:0.0f green:0.0f blue:0.0f alpha:0.7]];
+        
+        [self.view addSubview:bluredView];
+    }
 }
 
 #pragma mark CAMERA CONTROLS
@@ -351,7 +368,7 @@ static CGFloat optionUnavailableAlpha = 0.2;
         
         btn.bounds = CGRectMake(0, 0, 40, 40);
         btn.backgroundColor = [UIColor colorWithWhite:1 alpha:.96];
-        btn.alpha = optionAvailableAlpha;
+        btn.alpha = optionUnavailableAlpha;
         btn.hidden = YES;
         
         btn.layer.shouldRasterize = YES;
@@ -462,6 +479,9 @@ static CGFloat optionUnavailableAlpha = 0.2;
             _captureBtn.hidden = _hideCaptureButton;
             _backBtn.hidden = _hideBackButton;
         }
+        
+        _flashBtn.hidden = _hideFlashButton;
+        _switchCameraBtn.hidden = hideSwitchCameraButton;
         
         [self evaluateFlashBtn];
         
@@ -619,7 +639,7 @@ static CGFloat optionUnavailableAlpha = 0.2;
 - (void) evaluateFlashBtn {
     // Evaluate Flash Available?
     if (_myDevice.isFlashAvailable) {
-        _flashBtn.alpha = optionAvailableAlpha;
+        _flashBtn.alpha = optionUnavailableAlpha;
         
         // Evaluate Flash Active?
         if (_myDevice.isFlashActive) {
@@ -731,7 +751,7 @@ static CGFloat optionUnavailableAlpha = 0.2;
 #pragma mark ROTATION
 
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
-
+    
     if (_capturedImageV.image) {
         _capturedImageV.backgroundColor = [UIColor blackColor];
         
