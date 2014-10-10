@@ -92,6 +92,14 @@ static CGFloat optionUnavailableAlpha = 0.2;
 
 @synthesize hideAllControls = _hideAllControls, hideBackButton = _hideBackButton, hideCaptureButton = _hideCaptureButton;
 
+-(CGRect)cropRect{
+    if (_cropRect.size.width == 0 && _cropRect.size.height == 0) {
+        _cropRect = self.view.frame;
+    }
+    
+    return _cropRect;
+}
+
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
@@ -104,7 +112,6 @@ static CGFloat optionUnavailableAlpha = 0.2;
 
 
 - (void)viewDidLoad {
-    
     [super viewDidLoad];
     
     if (floor(NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_7_1) {
@@ -203,7 +210,8 @@ static CGFloat optionUnavailableAlpha = 0.2;
     
     if (_imageStreamV == nil) _imageStreamV = [[UIView alloc]init];
     _imageStreamV.alpha = 0;
-    _imageStreamV.frame = self.view.bounds;
+    //_imageStreamV.frame = self.view.bounds;
+    _imageStreamV.frame = self.cropRect;
     [self.view addSubview:_imageStreamV];
     
     if (_capturedImageV == nil) _capturedImageV = [[UIImageView alloc]init];
@@ -486,6 +494,10 @@ static CGFloat optionUnavailableAlpha = 0.2;
         [self evaluateFlashBtn];
         
     } completion:nil];
+}
+
+-(void) userReturnWithNoPicture{
+    [_delegate simpleCamUserCanceled:self];
 }
 
 - (void) capturePhoto {

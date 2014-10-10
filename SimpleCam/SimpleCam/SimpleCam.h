@@ -56,6 +56,8 @@
  */
 - (void) simpleCam:(SimpleCam *)simpleCam didFinishWithImage:(UIImage *)image;
 
+- (void) simpleCamUserCanceled:(SimpleCam *)simpleCam;
+
 @optional
 
 /*!
@@ -115,6 +117,8 @@
  */
 @property (nonatomic) float controlAnimateDuration;
 
+@property (nonatomic) CGRect cropRect;
+
 /*!
  Use this to close SimpleCam - Otherwise, the captureSession may not close properly and may result in memory leaks.
  */
@@ -126,5 +130,11 @@
 - (void) capturePhoto;
 
 - (void) switchCameraBtnPressed:(id)sender;
+
+- (void) backBtnPressed:(id)sender;
+
+-(void) userReturnWithNoPicture;
+
+- (void) photoCaptured;
 
 @end
