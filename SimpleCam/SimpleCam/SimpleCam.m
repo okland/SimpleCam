@@ -702,15 +702,16 @@ static CGFloat optionUnavailableAlpha = 0.2;
     }) : ({
         // IS CURRENTLY PORTRAIT
         
-        // targetWidth is the width our image would need to be at the current screenheight if we maintained the image ratio.
-        CGFloat targetWidth = screenHeight * 0.75; // 3:4 ratio
+        // @explanation: Use screen screenWidth instead of screenHeight to support use of isSquareMode
+        // targetHeight is the width our image would need to be at the current screenheight if we maintained the image ratio.
+        CGFloat targetHeight = screenWidth * 1.25; // 3:4 ratio
         
         // we have to draw around the context of the screen
         // our final image will be the image that is left in the frame of the context
         // by drawing outside it, we remove the edges of the picture
-        CGFloat offsetTop = (screenHeight - size.height) / 2;
-        CGFloat offsetLeft = (targetWidth - size.width) / 2;
-        CGRectMake(-offsetLeft, -offsetTop, targetWidth, screenHeight);
+        CGFloat offsetTop = (targetHeight - size.height) / 2;
+        CGFloat offsetLeft = (screenWidth - size.width) / 2;
+        CGRectMake(-offsetLeft, -offsetTop, screenWidth, targetHeight);
     });
     
     // START CONTEXT
