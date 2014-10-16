@@ -736,7 +736,7 @@ static CGFloat optionUnavailableAlpha = 0.2;
         
         // @explanation: Use screen screenWidth instead of screenHeight to support use of isSquareMode
         // targetHeight is the width our image would need to be at the current screenheight if we maintained the image ratio.
-        CGFloat targetHeight = screenWidth * 1.25; // 3:4 ratio
+        CGFloat targetHeight = screenWidth * 1.33; // 3:4 ratio
         
         // we have to draw around the context of the screen
         // our final image will be the image that is left in the frame of the context
