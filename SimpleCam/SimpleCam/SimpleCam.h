@@ -56,6 +56,8 @@
  */
 - (void) simpleCam:(SimpleCam *)simpleCam didFinishWithImage:(UIImage *)image;
 
+- (void) simpleCamUserCanceled:(SimpleCam *)simpleCam;
+
 @optional
 
 /*!
@@ -89,15 +91,33 @@
  Allow to hide the back button. Used if you want to programmatically control the view flow
  */
 @property (nonatomic) BOOL hideBackButton;
+/*!
+ Allow to hide the flash camera button Used if you don't want to allow flash
+ */
+@property (nonatomic) BOOL hideFlashButton;
+/*!
+ Allow to hide the flash camera button Used if you don't want to allow flash
+ */
+@property (nonatomic) BOOL showBluredBackground;
 
 /*!
  Don't show the preview phase of the photo acquisition
  */
 @property (nonatomic) BOOL disablePhotoPreview;
 /*!
+ allow using front camera
+ */
+@property (nonatomic) BOOL disableFrontCamera;
+/*!
+ allow using back camera
+ */
+@property (nonatomic) BOOL disableRearCamera;
+/*!
  Control animation duration
  */
 @property (nonatomic) float controlAnimateDuration;
+
+@property (nonatomic) CGRect cropRect;
 
 /*!
  Use this to close SimpleCam - Otherwise, the captureSession may not close properly and may result in memory leaks.
@@ -109,5 +129,12 @@
  */
 - (void) capturePhoto;
 
+- (void) switchCameraBtnPressed:(id)sender;
+
+- (void) backBtnPressed:(id)sender;
+
+-(void) userReturnWithNoPicture;
+
+- (void) photoCaptured;
 
 @end
