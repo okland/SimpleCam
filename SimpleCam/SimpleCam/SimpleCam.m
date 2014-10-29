@@ -158,12 +158,16 @@ static CGFloat optionUnavailableAlpha = 0.2;
             case AVAuthorizationStatusNotDetermined: {
                 // not determined
                 [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
-                    if(granted){
-                        [self setup];
-                        [self animateIntoView];
-                    } else {
-                        [self.delegate simpleCam:self didFinishWithImage:nil];
-                    }
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        if(granted){
+                            [self setup];
+                            [self animateIntoView];
+                        }
+                        else {
+                            // UI updates as needed
+                            [self.delegate simpleCam:self didFinishWithImage:nil];
+                        }
+                    });
                 }];
             }
             default:
